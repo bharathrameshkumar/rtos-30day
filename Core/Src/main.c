@@ -115,8 +115,6 @@ int main(void)
     Error_Handler();
   }
 
-  printf("rtos-30day: scheduler running\r\n");
-
   /* Start scheduler */
   osKernelStart();
 
