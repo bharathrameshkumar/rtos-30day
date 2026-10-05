@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,6 +114,8 @@ int main(void)
   {
     Error_Handler();
   }
+
+  printf("rtos-30day: scheduler running\r\n");
 
   /* Start scheduler */
   osKernelStart();
