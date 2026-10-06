@@ -57,6 +57,8 @@ const osThreadAttr_t defaultTask_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+static void vTaskP0(void *pvParameters);
+static void vTaskP1(void *pvParameters);
 
 /* USER CODE END FunctionPrototypes */
 
@@ -112,6 +114,29 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  TaskHandle_t xTaskP0 = NULL;
+  TaskHandle_t xTaskP1 = NULL;
+
+  BaseType_t xRet_P0;
+  BaseType_t xRet_P1;
+
+  xRet_P0 = xTaskCreate(vTaskP0,    /* task function */
+                     "P0",          /* name, for debug and vTaskList */
+                     128,           /* stack depth in WORDS: 128 x 4 = 512 bytes */
+                     NULL,          /* pvParameters */
+                     26,            /* priority (configMAX_PRIORITIES is 56 with CMSIS_V2) */
+                     &xTaskP0);     /* handle out, or NULL if you do not need it */
+  configASSERT(xRet_P0 == pdPASS);
+
+  xRet_P1 = xTaskCreate(vTaskP1,    /* task function */
+                     "P1",          /* name, for debug and vTaskList */
+                     128,           /* stack depth in WORDS: 128 x 4 = 512 bytes */
+                     NULL,          /* pvParameters */
+                     25,            /* priority (configMAX_PRIORITIES is 56 with CMSIS_V2) */
+                     &xTaskP1);     /* handle out, or NULL if you do not need it */
+  configASSERT(xRet_P1 == pdPASS);
+
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -141,6 +166,32 @@ void StartDefaultTask(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+static void vTaskP0(void *pvParameters)
+{
+	(void)pvParameters;                 /* not used here */
+	for(;;){							/* A task never return */
+		HAL_GPIO_TogglePin(P0_GPIO_Port, P0_Pin);
 
+/*		Delay introduced to check the task priorities
+ * 		TickType_t xStart = xTaskGetTickCount();
+ *
+ *		while ((xTaskGetTickCount() - xStart) < pdMS_TO_TICKS(15))
+ *		{
+ *		         spin: no block, the task stays Running
+ *		}
+*/
+
+		vTaskDelay(pdMS_TO_TICKS(100)); /* blocked for 100ms */
+	}
+}
+
+static void vTaskP1(void *pvParameters)
+{
+	(void)pvParameters;                 /* not used here */
+	for(;;){							/* A task never return */
+		HAL_GPIO_TogglePin(P1_GPIO_Port, P1_Pin);
+		vTaskDelay(pdMS_TO_TICKS(250)); /* blocked for 250ms */
+	}
+}
 /* USER CODE END Application */
 
