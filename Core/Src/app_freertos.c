@@ -35,7 +35,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define TASK0_PRIO   22u    /* below defaultTask (24) */
+#define TASK1_PRIO   22u
+#define SPIN_COUNT   20u    /* about 1-2 us per half period; tune it on the analyzer */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,7 +47,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+static TaskHandle_t hTask0 = NULL;
+static TaskHandle_t hTask1 = NULL;
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -114,9 +117,6 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  TaskHandle_t xTaskP0 = NULL;
-  TaskHandle_t xTaskP1 = NULL;
-
   BaseType_t xRet_P0;
   BaseType_t xRet_P1;
 
@@ -124,16 +124,16 @@ void MX_FREERTOS_Init(void) {
                      "P0",          /* name, for debug and vTaskList */
                      128,           /* stack depth in WORDS: 128 x 4 = 512 bytes */
                      NULL,          /* pvParameters */
-                     26,            /* priority (configMAX_PRIORITIES is 56 with CMSIS_V2) */
-                     &xTaskP0);     /* handle out, or NULL if you do not need it */
+					 TASK0_PRIO,            /* priority (configMAX_PRIORITIES is 56 with CMSIS_V2) */
+                     &hTask0);     /* handle out, or NULL if you do not need it */
   configASSERT(xRet_P0 == pdPASS);
 
   xRet_P1 = xTaskCreate(vTaskP1,    /* task function */
                      "P1",          /* name, for debug and vTaskList */
                      128,           /* stack depth in WORDS: 128 x 4 = 512 bytes */
                      NULL,          /* pvParameters */
-                     25,            /* priority (configMAX_PRIORITIES is 56 with CMSIS_V2) */
-                     &xTaskP1);     /* handle out, or NULL if you do not need it */
+					 TASK1_PRIO,            /* priority (configMAX_PRIORITIES is 56 with CMSIS_V2) */
+                     &hTask1);     /* handle out, or NULL if you do not need it */
   configASSERT(xRet_P1 == pdPASS);
 
 
@@ -155,7 +155,7 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-  printf("rtos-30day: scheduler running\r\n");
+  printf("RTOS-30day: scheduler running\r\n");
   /* Infinite loop */
   for(;;)
   {
@@ -171,16 +171,6 @@ static void vTaskP0(void *pvParameters)
 	(void)pvParameters;                 /* not used here */
 	for(;;){							/* A task never return */
 		HAL_GPIO_TogglePin(P0_GPIO_Port, P0_Pin);
-
-/*		Delay introduced to check the task priorities
- * 		TickType_t xStart = xTaskGetTickCount();
- *
- *		while ((xTaskGetTickCount() - xStart) < pdMS_TO_TICKS(15))
- *		{
- *		         spin: no block, the task stays Running
- *		}
-*/
-
 		vTaskDelay(pdMS_TO_TICKS(100)); /* blocked for 100ms */
 	}
 }
@@ -190,7 +180,7 @@ static void vTaskP1(void *pvParameters)
 	(void)pvParameters;                 /* not used here */
 	for(;;){							/* A task never return */
 		HAL_GPIO_TogglePin(P1_GPIO_Port, P1_Pin);
-		vTaskDelay(pdMS_TO_TICKS(250)); /* blocked for 250ms */
+		vTaskDelay(pdMS_TO_TICKS(100)); /* blocked for 100ms */
 	}
 }
 /* USER CODE END Application */
