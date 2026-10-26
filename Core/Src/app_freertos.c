@@ -180,7 +180,7 @@ static void vTaskP1(void *pvParameters)
 	(void)pvParameters;                 /* not used here */
 	for(;;){							/* A task never return */
 		HAL_GPIO_TogglePin(P1_GPIO_Port, P1_Pin);
-		vTaskDelay(pdMS_TO_TICKS(100)); /* blocked for 100ms */
+		vTaskDelay(pdMS_TO_TICKS(250)); /* blocked for 100ms */
 	}
 }
 /* USER CODE END Application */
